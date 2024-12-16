@@ -1,4 +1,4 @@
-# Registro de Transacciones
+# FinanzaSimple - Registro de Transacciones
 
 Este proyecto es una aplicación web simple para registrar transacciones de ingresos y egresos. Está diseñada para ser una herramienta útil para llevar un registro personalizado de tus finanzas, con sistema de autenticación y seguridad.
 
