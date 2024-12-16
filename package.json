@@ -9,8 +9,8 @@
     "dev": "nodemon index.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Agustín Andrews",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
