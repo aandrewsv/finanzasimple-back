@@ -1,3 +1,4 @@
+// models/Transaccion.js
 import mongoose from 'mongoose';
 
 const transaccionSchema = new mongoose.Schema({
@@ -12,13 +13,17 @@ const transaccionSchema = new mongoose.Schema({
     },
     descripcion: {
         type: String,
-        required: true,
-        trim: true
+        required: false
     },
     tipo: {
         type: String,
         required: true,
         enum: ['ingreso', 'egreso']
+    },
+    categoria: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Categoria',
+        required: true
     },
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +34,4 @@ const transaccionSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Transaccion = mongoose.model('Transaccion', transaccionSchema);
-
-export default Transaccion;
+export default mongoose.model('Transaccion', transaccionSchema);

@@ -78,9 +78,36 @@ Authorization: Bearer <token_jwt>
 - PUT "/api/transacciones/:id" --> Actualizar una transacción
 - DELETE "/api/transacciones/:id" --> Eliminar una transacción
 
+### Categorías (requieren autenticación)
+
+Todas las rutas de categorías requieren el header:
+Authorization: Bearer <token_jwt>
+
+- GET "/api/categorias" --> Obtener todas las categorías del usuario ordenadas por campo 'orden'
+- POST "/api/categorias" --> Crear una nueva categoría
+  * Body: {
+    "nombre": "Nombre Categoría",
+    "tipo": "ingreso|egreso",
+    "orden": 1
+  }
+
+- PUT "/api/categorias/:id" --> Actualizar una categoría
+  * Body: {
+    "nombre": "Nuevo Nombre",
+    "tipo": "ingreso|egreso",
+    "orden": 1
+  }
+
+Nota: Todos los campos son opcionales en la actualización
+
+- DELETE "/api/categorias/:id" --> Eliminar una categoría
+
+Nota: No se pueden eliminar categorías marcadas como isDefault
+
 ## Modelos de Datos
 
 ### Usuario
+
 ```javascript
 const usuarioSchema = new mongoose.Schema({
     email: {
@@ -98,6 +125,7 @@ const usuarioSchema = new mongoose.Schema({
 ```
 
 ### Transacción
+
 ```javascript
 const transaccionSchema = new mongoose.Schema({
     fecha: {
@@ -128,6 +156,37 @@ const transaccionSchema = new mongoose.Schema({
 });
 ```
 
+### Categoría
+
+```javascript
+const categoriaSchema = new mongoose.Schema({
+    nombre: {
+        type: String,
+        required: true,
+    },
+    tipo: {
+        type: String,
+        required: true,
+        enum: ['ingreso', 'egreso']
+    },
+    usuario: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    },
+    isDefault: {
+        type: Boolean,
+        default: false
+    },
+    orden: {
+        type: Number,
+        default: 0
+    }
+}, {
+    timestamps: true
+});
+```
+
 ## Seguridad
 
 - Autenticación mediante JWT
@@ -150,7 +209,8 @@ curl -X POST http://localhost:3000/api/auth/registro \
 -H "Content-Type: application/json" \
 -H "X-Admin-Code: tu_codigo_admin" \
 -d '{
-  "email": "usuario@ejemplo.com"
+  "email": "usuario@ejemplo.com",
+  "password": "opcional" 
 }'
 
 # Respuesta:
@@ -158,7 +218,7 @@ curl -X POST http://localhost:3000/api/auth/registro \
   "mensaje": "Usuario creado exitosamente",
   "credenciales": {
     "email": "usuario@ejemplo.com",
-    "password": "contraseña_generada_automaticamente"
+    "password": "contraseña_generada_automaticamente_o_provista"
   },
   "token": "jwt_token"
 }

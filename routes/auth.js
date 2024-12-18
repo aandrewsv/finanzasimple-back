@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import Usuario from '../models/Usuario.js';
 import rateLimit from 'express-rate-limit';
 import verificarCodigoAdmin from '../middleware/adminAuth.js';
+import { crearCategoriasDefault } from '../utils/crearCategoriasDefault.js';
 
 const router = express.Router();
 
@@ -46,7 +47,7 @@ const generarPassword = () => {
 // Registro de usuario (protegido con código admin)
 router.post('/registro', verificarCodigoAdmin, limiter, async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, password } = req.body;
 
         // Verificar si el usuario ya existe
         const usuarioExiste = await Usuario.findOne({ email });
@@ -54,16 +55,23 @@ router.post('/registro', verificarCodigoAdmin, limiter, async (req, res) => {
             return res.status(400).json({ mensaje: 'El usuario ya existe' });
         }
 
-        // Generar contraseña automáticamente
-        const password = generarPassword();
-
+        // Generar contraseña automáticamente sólo si no se envía una contraseña
+        // Si se envía una contraseña, se usa la misma
+        // Si no se envía una contraseña, se genera una aleatoria
+        let userPassword = password
+        if (!userPassword) {
+            userPassword = generarPassword();
+        }
         // Crear nuevo usuario
         const usuario = new Usuario({
             email,
-            password
+            password: userPassword
         });
 
         await usuario.save();
+
+        // Crear categorías por defecto
+        await crearCategoriasDefault(usuario._id);
 
         // Generar token
         const token = generarJWT(usuario._id);
@@ -73,7 +81,7 @@ router.post('/registro', verificarCodigoAdmin, limiter, async (req, res) => {
             mensaje: 'Usuario creado exitosamente',
             credenciales: {
                 email: usuario.email,
-                password: password // Mostrar la contraseña generada
+                password: userPassword // Mostrar la contraseña generada o la que se envió
             },
             token
         });

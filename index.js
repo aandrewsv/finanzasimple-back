@@ -5,6 +5,8 @@ import rateLimit from 'express-rate-limit';
 import conectarDB from './config/db.js';
 import transaccionesRoutes from './routes/transacciones.js';
 import authRoutes from './routes/auth.js';
+import categoriasRoutes from './routes/categorias.js';
+
 
 // Configuración de variables de entorno
 dotenv.config();
@@ -29,6 +31,7 @@ app.use(limiter);
 // Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/transacciones', transaccionesRoutes);
+app.use('/api/categorias', categoriasRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -36,7 +39,7 @@ app.get('/', (req, res) => {
 });
 
 // Puerto
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Iniciar el servidor
 app.listen(PORT, () => {

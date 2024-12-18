@@ -1,5 +1,5 @@
 {
-  "name": "finanzasimple",
+  "name": "finanzasimple-back",
   "version": "1.0.0",
   "description": "Este proyecto es una aplicación web simple para registrar transacciones de ingresos y egresos. Está diseñada para ser una herramienta útil para llevar un registro personalizado de tus finanzas.",
   "main": "index.js",
@@ -17,6 +17,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.3"
   },
