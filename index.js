@@ -6,6 +6,7 @@ import conectarDB from './config/db.js';
 import transaccionesRoutes from './routes/transacciones.js';
 import authRoutes from './routes/auth.js';
 import categoriasRoutes from './routes/categorias.js';
+import corsOptions from './config/corsConfig.js';
 
 
 // Configuración de variables de entorno
@@ -24,7 +25,7 @@ const limiter = rateLimit({
 conectarDB();
 
 // Configuración de middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(limiter);
 
