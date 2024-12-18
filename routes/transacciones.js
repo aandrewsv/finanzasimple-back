@@ -1,4 +1,6 @@
+// routes/transacciones.js
 import express from 'express';
+import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import Transaccion from '../models/Transaccion.js';
 import protegerRuta from '../middleware/auth.js';
 
@@ -7,13 +9,50 @@ const router = express.Router();
 // Proteger todas las rutas
 router.use(protegerRuta);
 
-// Obtener todas las transacciones del usuario
+// Obtener transacciones con filtros
 router.get('/', async (req, res) => {
     try {
-        const transacciones = await Transaccion.find({ usuario: req.usuario._id }).sort({ fecha: -1 });
+        const { startDate, endDate, tipo } = req.query;
+        
+        // Construir el query base
+        const query = {
+            usuario: req.usuario._id
+        };
+
+        // Filtro de fechas
+        if (startDate || endDate) {
+            query.fecha = {};
+            
+            if (startDate) {
+                // Establecer inicio del día para la fecha de inicio
+                query.fecha.$gte = startOfDay(parseISO(startDate));
+            }
+            
+            if (endDate) {
+                // Establecer fin del día para la fecha final
+                query.fecha.$lte = endOfDay(parseISO(endDate));
+            }
+        }
+
+        // Filtro de tipo (ingreso/egreso)
+        if (tipo) {
+            query.tipo = tipo;
+        }
+
+        const transacciones = await Transaccion
+            .find(query)
+            .sort({ fecha: -1 }) // Ordenar por fecha descendente
+            .populate('categoria', 'nombre') // Poblar el nombre de la categoría
+            .lean() // Convertir a objeto plano para mejor rendimiento
+            .exec();
+
         res.json(transacciones);
     } catch (error) {
-        res.status(500).json({ mensaje: 'Error al obtener las transacciones', error });
+        console.error('Error al obtener transacciones:', error);
+        res.status(500).json({ 
+            mensaje: 'Error al obtener las transacciones',
+            error: error.message 
+        });
     }
 });
 
