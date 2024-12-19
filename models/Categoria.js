@@ -16,14 +16,14 @@ const categoriaSchema = new mongoose.Schema({
         ref: 'Usuario',
         required: true
     },
-    isDefault: {
-        type: Boolean,
-        default: false
-    },
     orden: {
         type: Number,
         default: 0
-    }
+    },
+    isVisible: {
+        type: Boolean,
+        default: true
+    },
 }, {
     timestamps: true
 });

@@ -1,6 +1,6 @@
 # FinanzaSimple - Registro de Transacciones
 
-Este proyecto es una aplicación web simple para registrar transacciones de ingresos y egresos. Está diseñada para ser una herramienta útil para llevar un registro personalizado de tus finanzas, con sistema de autenticación y seguridad.
+Este proyecto consiste en una API REST para gestionar registros de transacciones financieras personales. Está diseñada para ser consumida por un frontend y permitir a los usuarios llevar un registro personalizado de sus finanzas, cuenta con sistema de autenticación y seguridad.
 
 ## Stack Tecnológico
 
@@ -14,95 +14,90 @@ Este proyecto es una aplicación web simple para registrar transacciones de ingr
 ## Funcionalidades
 
 - Sistema de autenticación:
-  * Registro controlado por administrador con generación automática de contraseñas seguras
-  * Login de usuarios
-  * Protección de rutas con JWT
+  - Registro controlado por administrador con generación automática de contraseñas seguras
+  - Login de usuarios
+  - Protección de rutas con JWT
 - Registro de transacciones: Crea, edita y elimina transacciones de ingresos y egresos
 - Listado de transacciones: Visualiza todas las transacciones registradas por usuario
 - Filtrado y búsqueda: Filtra y busca transacciones por fecha, monto, descripción y tipo
+- Gestión de categorías: Crea, edita y elimina categorías de transacciones
 - Seguridad:
-  * Passwords encriptados
-  * Rate limiting
-  * Protección de rutas
-  * Aislamiento de datos por usuario
+  - Passwords encriptados
+  - Rate limiting
+  - Protección de rutas
+  - Aislamiento de datos por usuario
 
 ## Instalación y Ejecución
 
 1. Clona el repositorio:
-```bash
-git clone https://github.com/tu-usuario/registro-transacciones.git
-```
+
+    ```bash
+    git clone https://github.com/aandrewsv/finanzasimple-back
+    ```
 
 2. Instala las dependencias:
-```bash
-npm install
-```
+
+    ```bash
+    npm install
+    ```
 
 3. Configura las variables de entorno: crea un archivo .env con la siguiente información:
-```env
-MONGO_URI=tu_url_de_mongodb_atlas
-PORT=3000
-JWT_SECRET=tu_clave_secreta_jwt
-ADMIN_SECRET_CODE=tu_codigo_secreto_para_registro
-```
+
+    ```env
+    MONGO_URI=tu_url_de_mongodb_atlas
+    PORT=3000
+    JWT_SECRET=tu_clave_secreta_jwt
+    ADMIN_SECRET_CODE=tu_codigo_secreto_para_registro
+    ```
 
 4. Ejecuta la aplicación:
-```bash
-# Modo desarrollo
-npm run dev
 
-# Modo producción
-npm start
-```
+    ```bash
+    # Modo desarrollo
+    npm run dev
+
+    # Modo producción
+    npm start
+    ```
 
 ## Endpoints
 
 ### Autenticación
 
-- POST "/api/auth/registro" --> Registrar nuevo usuario (requiere código de administrador)
-  * Header requerido: X-Admin-Code
-  * Body: { "email": "usuario@ejemplo.com" }
-  * Respuesta: Devuelve las credenciales generadas automáticamente
+- POST `/api/auth/registro` --> Registrar nuevo usuario (requiere código de administrador)
+  - Header `requerido: X-Admin-Code`
+  - Body: `{ "email": "usuario@ejemplo.com" }`
+  - Respuesta: Devuelve las credenciales generadas automáticamente
 
-- POST "/api/auth/login" --> Iniciar sesión
-  * Body: { "email": "usuario@ejemplo.com", "password": "contraseña" }
+- POST `/api/auth/login` --> Iniciar sesión
+  - Body: `{ "email": "usuario@ejemplo.com", "password": "contraseña" }`
 
 ### Transacciones (requieren autenticación)
 
 Todas las rutas de transacciones requieren el header:
 Authorization: Bearer <token_jwt>
 
-- GET "/api/transacciones" --> Obtener todas las transacciones del usuario
-- POST "/api/transacciones" --> Crear una nueva transacción
-- GET "/api/transacciones/:id" --> Obtener una transacción por ID
-- PUT "/api/transacciones/:id" --> Actualizar una transacción
-- DELETE "/api/transacciones/:id" --> Eliminar una transacción
+- GET `/api/transacciones` --> Obtener todas las transacciones del usuario
+- POST `/api/transacciones` --> Crear una nueva transacción
+- GET `/api/transacciones/:id` --> Obtener una transacción por ID
+- PUT `/api/transacciones/:id` --> Actualizar una transacción
+- DELETE `/api/transacciones/:id` --> Eliminar una transacción
 
 ### Categorías (requieren autenticación)
 
 Todas las rutas de categorías requieren el header:
 Authorization: Bearer <token_jwt>
 
-- GET "/api/categorias" --> Obtener todas las categorías del usuario ordenadas por campo 'orden'
-- POST "/api/categorias" --> Crear una nueva categoría
-  * Body: {
-    "nombre": "Nombre Categoría",
-    "tipo": "ingreso|egreso",
-    "orden": 1
-  }
+- GET `/api/categorias` --> Obtener todas las categorías del usuario ordenadas por campo 'orden'
+- POST `/api/categorias` --> Crear una nueva categoría
+  - Body: `{ "nombre": "Nombre Categoría", "tipo": "ingreso|egreso", "orden": 1 }`
 
 - PUT "/api/categorias/:id" --> Actualizar una categoría
-  * Body: {
-    "nombre": "Nuevo Nombre",
-    "tipo": "ingreso|egreso",
-    "orden": 1
-  }
+  - Body: `{ "nombre": "Nuevo Nombre", "tipo": "ingreso|egreso", "orden": 1 }`
 
 Nota: Todos los campos son opcionales en la actualización
 
-- DELETE "/api/categorias/:id" --> Eliminar una categoría
-
-Nota: No se pueden eliminar categorías marcadas como isDefault
+- DELETE `/api/categorias/:id` --> Eliminar una categoría
 
 ## Modelos de Datos
 
@@ -150,6 +145,11 @@ const transaccionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
+    },
+    categoria: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Categoria',
+        required: true
     }
 }, {
     timestamps: true
@@ -173,10 +173,6 @@ const categoriaSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Usuario',
         required: true
-    },
-    isDefault: {
-        type: Boolean,
-        default: false
     },
     orden: {
         type: Number,
@@ -242,5 +238,6 @@ curl -X POST http://localhost:3000/api/transacciones \
 -d '{
   "monto": 1500,
   "descripcion": "Salario",
-  "tipo": "ingreso"
+  "tipo": "ingreso",
+  "categoria": "id_categoria"
 }'
