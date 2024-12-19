@@ -23,7 +23,11 @@ const categoriaSchema = new mongoose.Schema({
     orden: {
         type: Number,
         default: 0
-    }
+    },
+    isVisible: {
+        type: Boolean,
+        default: true
+    },
 }, {
     timestamps: true
 });

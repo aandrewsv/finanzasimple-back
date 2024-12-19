@@ -99,6 +99,32 @@ router.put('/:id', protegerRuta, async (req, res) => {
     }
 });
 
+
+
+
+// Función auxiliar para obtener el ID de la categoría "Otros" correspondiente
+const getDefaultCategoryId = async (usuario, tipo) => {
+  const defaultName = tipo === 'ingreso' ? '✨ Otros Ingresos' : '📝 Otros Gastos';
+  
+  const defaultCategory = await Categoria.findOne({
+    nombre: defaultName,
+    usuario: usuario,
+    tipo: tipo,
+    isDefault: true
+  });
+
+  if (!defaultCategory) {
+    throw new Error(`No se encontró la categoría por defecto para ${tipo}s`);
+  }
+
+  return defaultCategory._id;
+};
+
+
+
+
+
+
 // Eliminar categoría - DELETE api/categorias/:id
 router.delete('/:id', protegerRuta, async (req, res) => {
     try {
@@ -119,12 +145,68 @@ router.delete('/:id', protegerRuta, async (req, res) => {
             return res.status(400).json({ msg: 'No se pueden eliminar categorías por defecto' });
         }
 
+        // Obtener la categoría "Otros" correspondiente
+        const defaultCategoryId = await getDefaultCategoryId(
+            req.usuario._id, 
+            categoriaAEliminar.tipo
+        );
+
+        // Actualizar todas las transacciones asociadas a la categoría a "Otros"
+        const updateResult = await Transaccion.updateMany(
+            { categoria: req.params.id },
+            { categoria: defaultCategoryId }
+        );
+
         await Categoria.findByIdAndDelete(req.params.id);
-        res.json({ msg: 'Categoría eliminada' });
+        res.json({ 
+            mensaje: 'Categoría eliminada correctamente',
+            transaccionesActualizadas: updateResult.modifiedCount
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ msg: 'Hubo un error al eliminar la categoría' });
     }
 });
+
+// Actualizar visibilidad de categoría
+router.patch('/:id/visibility', protegerRuta, async (req, res) => {
+    try {
+        const { isVisible } = req.body;
+
+        if (typeof isVisible !== 'boolean') {
+            return res.status(400).json({ 
+                mensaje: 'El valor de visibilidad debe ser booleano' 
+            });
+        }
+
+        const categoria = await Categoria.findOne({
+            _id: req.params.id,
+            usuario: req.usuario._id
+        });
+
+        if (!categoria) {
+            return res.status(404).json({ mensaje: 'Categoría no encontrada' });
+        }
+
+        // No permitir ocultar categorías por defecto
+        if (categoria.isDefault && !isVisible) {
+            return res.status(400).json({ 
+                mensaje: 'No se pueden ocultar las categorías predeterminadas' 
+            });
+        }
+
+        categoria.isVisible = isVisible;
+        await categoria.save();
+
+        res.json(categoria);
+    } catch (error) {
+        console.error('Error al actualizar visibilidad:', error);
+        res.status(500).json({ 
+            mensaje: 'Error al actualizar la visibilidad de la categoría',
+            error: error.message 
+        });
+    }
+});
+
 
 export default router;
