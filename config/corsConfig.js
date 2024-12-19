@@ -22,7 +22,7 @@ const corsOptions = {
             callback(new Error(`Origen ${origin} no permitido por CORS`));
         }
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH','DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,  // Permite cookies en las peticiones
     maxAge: 86400      // Cache de preflight durante 24 horas

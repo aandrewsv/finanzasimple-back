@@ -15,7 +15,6 @@ export const crearCategoriasDefault = async (usuarioId) => {
             const nuevaCategoria = new Categoria({
                 ...cat,
                 usuario: usuarioId,
-                isDefault: true
             });
             return nuevaCategoria.save();
         });
