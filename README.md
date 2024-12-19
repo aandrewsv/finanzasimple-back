@@ -187,9 +187,9 @@ const categoriaSchema = new mongoose.Schema({
 
 - Autenticación mediante JWT
 - Contraseñas generadas automáticamente con criterios de seguridad:
-  * Mínimo 12 caracteres
-  * Incluye números, letras mayúsculas y minúsculas, y caracteres especiales
-  * Generación aleatoria para mayor seguridad
+  - Mínimo 12 caracteres
+  - Incluye números, letras mayúsculas y minúsculas, y caracteres especiales
+  - Generación aleatoria para mayor seguridad
 - Passwords encriptados con bcrypt
 - Rate limiting: 100 peticiones por 15 minutos
 - Registro de usuarios controlado por código de administrador
@@ -200,6 +200,7 @@ const categoriaSchema = new mongoose.Schema({
 ## Ejemplos de Uso
 
 ### Registro de Usuario (Solo Admin)
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/registro \
 -H "Content-Type: application/json" \
@@ -221,6 +222,7 @@ curl -X POST http://localhost:3000/api/auth/registro \
 ```
 
 ### Login
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
 -H "Content-Type: application/json" \
@@ -231,6 +233,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 ### Crear Transacción
+
 ```bash
 curl -X POST http://localhost:3000/api/transacciones \
 -H "Content-Type: application/json" \

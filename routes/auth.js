@@ -120,4 +120,57 @@ router.post('/login', limiter, async (req, res) => {
     }
 });
 
+// Agregar este endpoint en tu archivo de rutas de autenticación
+
+// Verificar token (protegido)
+router.get('/verify', async (req, res) => {
+    try {
+        // Obtener el token del header
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ 
+                autenticado: false, 
+                mensaje: 'No se proporcionó token' 
+            });
+        }
+
+        try {
+            // Verificar el token
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretopordefecto');
+            
+            // Buscar el usuario
+            const usuario = await Usuario.findById(decoded.id);
+            
+            if (!usuario) {
+                return res.status(401).json({ 
+                    autenticado: false, 
+                    mensaje: 'Usuario no encontrado' 
+                });
+            }
+
+            // Token válido y usuario existe
+            res.json({
+                autenticado: true,
+                usuario: {
+                    _id: usuario._id,
+                    email: usuario.email
+                }
+            });
+        } catch (error) {
+            // Error al verificar el token
+            return res.status(401).json({ 
+                autenticado: false, 
+                mensaje: 'Token inválido' 
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ 
+            autenticado: false, 
+            mensaje: 'Error en la verificación', 
+            error: error.message 
+        });
+    }
+});
+
 export default router;
